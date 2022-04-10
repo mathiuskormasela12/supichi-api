@@ -1,20 +1,26 @@
 // ========== Auth Service
 // import all modules
-
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, HttpStatus, Request } from '@nestjs/common';
+import { response, responseGenerator } from '../helpers';
 
 @Injectable()
 export class AuthService {
-	constructor(private prismaService: PrismaService) {}
-
-	public async register() {
-		try {
-			const results = await this.prismaService.user.findMany();
-
-			return results;
-		} catch (err) {
-			return err;
-		}
+	public async register(@Request() req: Request) {
+		// throw response({
+		// 	status: HttpStatus.OK,
+		// 	success: true,
+		// 	message: 'Hi',
+		// });
+		throw response(
+			responseGenerator(
+				req,
+				HttpStatus.OK,
+				true,
+				'This is the results',
+				[1, 2, 4],
+				5,
+				10,
+			),
+		);
 	}
 }
