@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import * as compresion from 'compression';
@@ -19,6 +19,12 @@ async function bootstrap() {
 	app.enableCors({
 		origin: constants.WHITELIST,
 	});
+
+	app.useGlobalPipes(
+		new ValidationPipe({
+			whitelist: true,
+		}),
+	);
 
 	await app.listen(PORT);
 	Logger.log(`The Supichi RESTful API is running at ${API_URL}`);
