@@ -3,3 +3,4 @@
 
 export * from './response';
 export * from './responseGenerator';
+export * from './mailer';
