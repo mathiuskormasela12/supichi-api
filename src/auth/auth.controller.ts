@@ -2,13 +2,27 @@
 // import all modules
 import { Controller, Post, Request, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto';
+import { CreateAccessTokenByRefresh, LoginDto, RegisterDto } from './dto';
 
 @Controller('api/v1')
 export class AuthController {
 	constructor(private authService: AuthService) {}
+
 	@Post('auth/register')
 	public register(@Request() req: Request, @Body() dto: RegisterDto) {
 		return this.authService.register(req, dto);
+	}
+
+	@Post('auth/login')
+	public login(@Request() req: Request, @Body() dto: LoginDto) {
+		return this.authService.login(req, dto);
+	}
+
+	@Post('auth/access-token')
+	public getAccessToken(
+		@Request() req: Request,
+		@Body() dto: CreateAccessTokenByRefresh,
+	) {
+		return this.authService.createAccessTokenByRefreshToken(req, dto);
 	}
 }
