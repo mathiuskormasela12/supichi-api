@@ -1,11 +1,12 @@
 // ========= Auth Controller
 // import all modules
-import { Controller, Post, Request, Body } from '@nestjs/common';
+import { Controller, Post, Request, Body, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
 	CreateAccessTokenByRefresh,
 	LoginDto,
 	RegisterDto,
+	ResetPasswordDto,
 	SendResetCodeDto,
 } from './dto';
 
@@ -34,5 +35,10 @@ export class AuthController {
 		@Body() dto: CreateAccessTokenByRefresh,
 	) {
 		return this.authService.createAccessTokenByRefreshToken(req, dto);
+	}
+
+	@Put('auth/password')
+	public resetPassword(@Request() req: Request, @Body() dto: ResetPasswordDto) {
+		return this.authService.resetPassword(req, dto);
 	}
 }

@@ -11,6 +11,7 @@ import {
 	LoginDto,
 	CreateAccessTokenByRefresh,
 	SendResetCodeDto,
+	ResetPasswordDto,
 } from './dto';
 import { IJwtToken } from '../interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -282,6 +283,88 @@ export class AuthService {
 						HttpStatus.CREATED,
 						true,
 						'The reset code has been sent',
+					);
+				} catch (err) {
+					if (err instanceof Error) {
+						throw responseGenerator(
+							req,
+							HttpStatus.BAD_REQUEST,
+							false,
+							err.message,
+						);
+					} else {
+						throw err;
+					}
+				}
+			} catch (err) {
+				if (err instanceof Error) {
+					throw responseGenerator(
+						req,
+						HttpStatus.BAD_REQUEST,
+						false,
+						err.message,
+					);
+				} else {
+					throw err;
+				}
+			}
+		} catch (err) {
+			if (err instanceof Error) {
+				throw response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw response(err);
+			}
+		}
+	}
+
+	public async resetPassword(
+		@Request() req: Request,
+		@Body() dto: ResetPasswordDto,
+	) {
+		if (dto.newPassword !== dto.confirmPassword) {
+			throw response({
+				status: HttpStatus.BAD_REQUEST,
+				success: false,
+				message: "The new password and the confirm password doesn't match",
+			});
+		}
+
+		try {
+			const isOtpExists = await this.prismaService.user.findFirst({
+				where: { otp: dto.resetCode },
+			});
+
+			if (!isOtpExists) {
+				throw responseGenerator(
+					req,
+					HttpStatus.BAD_REQUEST,
+					false,
+					'The otp code is invalid',
+				);
+			}
+
+			try {
+				const hashed = await argon.hash(dto.newPassword);
+				try {
+					const result = await this.prismaService.user.update({
+						data: { otp: null, password: hashed },
+						where: { id: isOtpExists.id },
+					});
+
+					delete result.password;
+					delete result.otp;
+					delete result.photo;
+
+					throw responseGenerator(
+						req,
+						HttpStatus.OK,
+						true,
+						'Reset Password Successfully',
+						result,
 					);
 				} catch (err) {
 					if (err instanceof Error) {
