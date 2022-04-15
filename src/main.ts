@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import * as compresion from 'compression';
 import * as morgan from 'morgan';
+import * as expressFileUpload from 'express-fileupload';
 import 'dotenv/config';
 import { AppModule } from './app.module';
 import constants from './constants';
@@ -23,6 +24,12 @@ async function bootstrap() {
 	app.useGlobalPipes(
 		new ValidationPipe({
 			whitelist: true,
+		}),
+	);
+
+	app.use(
+		expressFileUpload({
+			createParentPath: true,
 		}),
 	);
 

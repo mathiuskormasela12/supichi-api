@@ -6,6 +6,8 @@ import { join } from 'path';
 import 'dotenv/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './user/user.module';
+import { UploadModule } from './upload/upload.module';
 
 const { EMAIL, EMAIL_PASSWORD, EMAIL_HOST } = process.env;
 @Module({
@@ -19,7 +21,9 @@ const { EMAIL, EMAIL_PASSWORD, EMAIL_HOST } = process.env;
 		MailerModule.forRoot({
 			transport: `smtps://${EMAIL}:${EMAIL_PASSWORD}@${EMAIL_HOST}`,
 		}),
+		UserModule,
 		AuthModule,
+		UploadModule,
 		PrismaModule,
 	],
 })
