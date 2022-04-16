@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { response, responseGenerator, sendResetCode } from '../helpers';
 import {
 	RegisterDto,
 	LoginDto,
@@ -15,6 +14,8 @@ import {
 } from './dto';
 import { IJwtToken } from '../interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ResponseService } from 'src/response/response.service';
+import { NodeMailerService } from 'src/nodemailer/nodemailer.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,8 @@ export class AuthService {
 		private jwtService: JwtService,
 		private configService: ConfigService,
 		private mailerService: MailerService,
+		private responseService: ResponseService,
+		private nodeMailerService: NodeMailerService,
 	) {}
 
 	public async register(@Request() req: Request, @Body() dto: RegisterDto) {
@@ -34,7 +37,7 @@ export class AuthService {
 			});
 
 			if (user) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
 					false,
@@ -56,7 +59,7 @@ export class AuthService {
 					delete result.otp;
 					delete result.photo;
 
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
 						true,
@@ -65,7 +68,7 @@ export class AuthService {
 					);
 				} catch (err) {
 					if (err instanceof Error) {
-						throw responseGenerator(
+						throw this.responseService.responseGenerator(
 							req,
 							HttpStatus.BAD_REQUEST,
 							false,
@@ -77,7 +80,7 @@ export class AuthService {
 				}
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -89,13 +92,13 @@ export class AuthService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}
@@ -109,7 +112,7 @@ export class AuthService {
 			});
 
 			if (!user || !(await argon.verify(user.password, dto.password))) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
 					false,
@@ -126,7 +129,7 @@ export class AuthService {
 				try {
 					const refreshToken = await this.generateRefreshToken(payload);
 
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.OK,
 						true,
@@ -138,7 +141,7 @@ export class AuthService {
 					);
 				} catch (err) {
 					if (err instanceof Error) {
-						throw responseGenerator(
+						throw this.responseService.responseGenerator(
 							req,
 							HttpStatus.BAD_REQUEST,
 							false,
@@ -150,7 +153,7 @@ export class AuthService {
 				}
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -162,13 +165,13 @@ export class AuthService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}
@@ -190,7 +193,7 @@ export class AuthService {
 						id: decode.id,
 						username: decode.username,
 					});
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
 						true,
@@ -199,7 +202,7 @@ export class AuthService {
 					);
 				} catch (err) {
 					if (err instanceof Error) {
-						throw responseGenerator(
+						throw this.responseService.responseGenerator(
 							req,
 							HttpStatus.BAD_REQUEST,
 							false,
@@ -211,7 +214,7 @@ export class AuthService {
 				}
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -223,13 +226,13 @@ export class AuthService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}
@@ -243,7 +246,7 @@ export class AuthService {
 			});
 
 			if (!user) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.NOT_FOUND,
 					false,
@@ -252,7 +255,7 @@ export class AuthService {
 			}
 
 			if (user.otp) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
 					false,
@@ -267,7 +270,7 @@ export class AuthService {
 			}`;
 
 			try {
-				await sendResetCode(
+				await this.nodeMailerService.sendResetCode(
 					this.mailerService,
 					dto.username,
 					this.configService.get('EMAIL'),
@@ -278,7 +281,7 @@ export class AuthService {
 						data: { otp },
 						where: { id: user.id },
 					});
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
 						true,
@@ -286,7 +289,7 @@ export class AuthService {
 					);
 				} catch (err) {
 					if (err instanceof Error) {
-						throw responseGenerator(
+						throw this.responseService.responseGenerator(
 							req,
 							HttpStatus.BAD_REQUEST,
 							false,
@@ -298,7 +301,7 @@ export class AuthService {
 				}
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -310,13 +313,13 @@ export class AuthService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}
@@ -326,7 +329,7 @@ export class AuthService {
 		@Body() dto: ResetPasswordDto,
 	) {
 		if (dto.newPassword !== dto.confirmPassword) {
-			throw response({
+			throw this.responseService.response({
 				status: HttpStatus.BAD_REQUEST,
 				success: false,
 				message: "The new password and the confirm password doesn't match",
@@ -339,7 +342,7 @@ export class AuthService {
 			});
 
 			if (!isOtpExists) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
 					false,
@@ -359,7 +362,7 @@ export class AuthService {
 					delete result.otp;
 					delete result.photo;
 
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.OK,
 						true,
@@ -368,7 +371,7 @@ export class AuthService {
 					);
 				} catch (err) {
 					if (err instanceof Error) {
-						throw responseGenerator(
+						throw this.responseService.responseGenerator(
 							req,
 							HttpStatus.BAD_REQUEST,
 							false,
@@ -380,7 +383,7 @@ export class AuthService {
 				}
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -392,13 +395,13 @@ export class AuthService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}

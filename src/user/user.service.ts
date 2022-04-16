@@ -2,8 +2,8 @@
 // import all modules
 import { HttpStatus, Injectable, Request } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { response, responseGenerator } from 'src/helpers';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ResponseService } from 'src/response/response.service';
 import { UploadService } from 'src/upload/upload.service';
 import { IRequestWithUpload } from '../interfaces';
 
@@ -13,6 +13,7 @@ export class UserService {
 		private uploadService: UploadService,
 		private prismaService: PrismaService,
 		private configService: ConfigService,
+		private responseService: ResponseService,
 	) {}
 
 	public async uploadPhoto(@Request() req: IRequestWithUpload, id: number) {
@@ -24,7 +25,7 @@ export class UserService {
 			});
 
 			if (!user) {
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
 					false,
@@ -33,10 +34,15 @@ export class UserService {
 			}
 
 			const { success, photo, message, status } =
-				this.uploadService.uploadPhoto(req, '/images/');
+				this.uploadService.uploadPhoto(req, `/images/`);
 
 			if (!success) {
-				throw responseGenerator(req, status, success, message);
+				throw this.responseService.responseGenerator(
+					req,
+					status,
+					success,
+					message,
+				);
 			}
 
 			try {
@@ -50,7 +56,7 @@ export class UserService {
 				delete result.fullName;
 				delete result.username;
 
-				throw responseGenerator(
+				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.OK,
 					true,
@@ -64,7 +70,7 @@ export class UserService {
 				);
 			} catch (err) {
 				if (err instanceof Error) {
-					throw responseGenerator(
+					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.BAD_REQUEST,
 						false,
@@ -76,13 +82,13 @@ export class UserService {
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				throw response({
+				throw this.responseService.response({
 					status: HttpStatus.BAD_REQUEST,
 					success: false,
 					message: err.message,
 				});
 			} else {
-				throw response(err);
+				throw this.responseService.response(err);
 			}
 		}
 	}

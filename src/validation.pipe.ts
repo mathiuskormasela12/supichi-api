@@ -8,10 +8,12 @@ import {
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { response } from './helpers';
+import { ResponseService } from './response/response.service';
 
 @Injectable()
 export class ValidationPipe implements PipeTransform {
+	constructor(private responseService: ResponseService) {}
+
 	public async transform(value: unknown, { metatype }: ArgumentMetadata) {
 		if (!metatype || !this.toValidate(metatype)) {
 			return value;
@@ -22,7 +24,7 @@ export class ValidationPipe implements PipeTransform {
 
 		if (errors.length > 0) {
 			const [message] = Object.values(errors[0].constraints);
-			throw response({
+			throw this.responseService.response({
 				status: HttpStatus.BAD_REQUEST,
 				success: false,
 				message,

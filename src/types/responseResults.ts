@@ -13,13 +13,3 @@ export type ResponseResults = {
 		nextLink: string | null;
 	};
 };
-
-export type ResponseGeneratorFunc = (
-	req: Request,
-	status: number,
-	success: boolean,
-	message: string,
-	results?: unknown,
-	totalPages?: number,
-	totalData?: number,
-) => ResponseResults;

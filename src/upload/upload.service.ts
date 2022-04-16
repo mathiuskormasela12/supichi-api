@@ -2,14 +2,15 @@
 // import all modules
 import { HttpStatus, Injectable, Request } from '@nestjs/common';
 import { join } from 'path';
-import { IRequestWithUpload, IUploadPhotoResponse } from '../interfaces';
+import { mkdirSync, existsSync } from 'fs';
+import { IRequestWithUpload, IUploadFileResponse } from '../interfaces';
 
 @Injectable()
 export class UploadService {
 	public uploadPhoto(
 		@Request() req: IRequestWithUpload,
 		path: string,
-	): IUploadPhotoResponse {
+	): IUploadFileResponse {
 		if (!req.files) {
 			return {
 				status: HttpStatus.BAD_REQUEST,
@@ -52,6 +53,53 @@ export class UploadService {
 		return {
 			success: true,
 			photo: fileName,
+		};
+	}
+
+	public uploadVoice(
+		@Request() req: IRequestWithUpload,
+		path: string,
+		username: string,
+	): IUploadFileResponse {
+		if (!req.files) {
+			return {
+				status: HttpStatus.BAD_REQUEST,
+				success: false,
+				message: 'The voice file is required',
+			};
+		}
+
+		const voice = req.files.voice;
+		const extValid = /mp3/gi;
+		const checkMimeType = extValid.test(voice.mimetype);
+		const checkExt = extValid.test(voice.name);
+
+		if (!checkMimeType && !checkExt) {
+			return {
+				status: HttpStatus.BAD_REQUEST,
+				success: false,
+				message: "You can't upload files other than voice file",
+			};
+		}
+
+		const fileExt = voice.name.split('.')[1].toLowerCase();
+		let fileName = '';
+		fileName += voice.name.split('.')[0].toLowerCase();
+		fileName += '-';
+		fileName += String(Date.now());
+		fileName += '.';
+		fileName += fileExt;
+
+		if (existsSync(join(__dirname, `../../public/${username}`))) {
+			voice.mv(join(__dirname, `../../public/${username}/${fileName}`));
+		} else {
+			mkdirSync(join(__dirname, `../../public/${username}`));
+			voice.mv(join(__dirname, `../../public/${username}/${fileName}`));
+		}
+
+		return {
+			success: true,
+			voice: fileName,
 		};
 	}
 }
