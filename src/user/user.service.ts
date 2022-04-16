@@ -1,11 +1,19 @@
 // ========== User Service
 // import all modules
-import { HttpStatus, Injectable, Request } from '@nestjs/common';
+import {
+	Body,
+	HttpStatus,
+	Injectable,
+	Param,
+	ParseIntPipe,
+	Request,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseService } from 'src/response/response.service';
 import { UploadService } from 'src/upload/upload.service';
 import { IRequestWithUpload } from '../interfaces';
+import { EditUserProfileDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -67,6 +75,65 @@ export class UserService {
 							photo,
 						),
 					},
+				);
+			} catch (err) {
+				if (err instanceof Error) {
+					throw this.responseService.responseGenerator(
+						req,
+						HttpStatus.BAD_REQUEST,
+						false,
+						err.message,
+					);
+				} else {
+					throw err;
+				}
+			}
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
+
+	public async editUserProfile(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+		@Body() dto: EditUserProfileDto,
+	) {
+		try {
+			const user = this.prismaService.user.findFirst({ where: { id } });
+
+			if (!user) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.BAD_REQUEST,
+					false,
+					'The user does not exist',
+				);
+			}
+
+			try {
+				const result = await this.prismaService.user.update({
+					data: { fullName: dto.fullName, username: dto.username },
+					where: { id },
+				});
+
+				delete result.otp;
+				delete result.password;
+				delete result.photo;
+
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.OK,
+					true,
+					'The user profile has been updated successfully',
+					result,
 				);
 			} catch (err) {
 				if (err instanceof Error) {
