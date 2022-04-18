@@ -164,4 +164,42 @@ export class TextService {
 			}
 		}
 	}
+
+	public async getTextDetail(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+	) {
+		try {
+			const textDetail = await this.prismaService.text.findUnique({
+				where: { id },
+			});
+
+			if (!textDetail) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.BAD_REQUEST,
+					false,
+					'The text does not exist',
+				);
+			}
+
+			throw this.responseService.responseGenerator(
+				req,
+				HttpStatus.OK,
+				true,
+				'Successfully to get detail of text',
+				textDetail,
+			);
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
 }

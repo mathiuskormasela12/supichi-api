@@ -9,6 +9,7 @@ import {
 	Delete,
 	Param,
 	ParseIntPipe,
+	Get,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IRequestWithUploadAndAppLocals } from 'src/interfaces';
@@ -35,5 +36,14 @@ export class TextController {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		return this.textService.removeText(req, id);
+	}
+
+	@Get('text/:id')
+	@UseGuards(AuthGuard)
+	public getTextDetail(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+	) {
+		return this.textService.getTextDetail(req, id);
 	}
 }

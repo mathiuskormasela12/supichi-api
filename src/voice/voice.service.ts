@@ -200,4 +200,46 @@ export class VoiceService {
 			}
 		}
 	}
+
+	public async getVoiceDetail(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+	) {
+		try {
+			const voiceDetail = await this.prismaService.voice.findUnique({
+				where: { id },
+			});
+
+			if (!voiceDetail) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.BAD_REQUEST,
+					false,
+					'The voice does not exist',
+				);
+			}
+
+			const voiceLink: string = this.configService
+				.get('APP_URL')
+				.concat('/voices/', voiceDetail.voice);
+
+			throw this.responseService.responseGenerator(
+				req,
+				HttpStatus.OK,
+				true,
+				'Successfully to get detail of voice',
+				{ ...voiceDetail, voiceLink },
+			);
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
 }
