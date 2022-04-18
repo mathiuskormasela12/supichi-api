@@ -11,11 +11,11 @@ export class UploadService {
 		@Request() req: IRequestWithUpload,
 		path: string,
 	): IUploadFileResponse {
-		if (!req.files) {
+		if (!req.files || !req.files.photo) {
 			return {
 				status: HttpStatus.BAD_REQUEST,
 				success: false,
-				message: 'The user photo is required',
+				message: 'The photo is required',
 			};
 		}
 
@@ -40,7 +40,7 @@ export class UploadService {
 			};
 		}
 
-		const fileExt = photo.name.split('.')[1].toLowerCase();
+		const fileExt = photo.name.split('.').pop().toLowerCase();
 		let fileName = '';
 		fileName += photo.name.split('.')[0].toLowerCase();
 		fileName += '-';
@@ -58,7 +58,6 @@ export class UploadService {
 
 	public uploadVoice(
 		@Request() req: IRequestWithUpload,
-		path: string,
 		username: string,
 	): IUploadFileResponse {
 		if (!req.files) {
@@ -90,11 +89,11 @@ export class UploadService {
 		fileName += '.';
 		fileName += fileExt;
 
-		if (existsSync(join(__dirname, `../../public/${username}`))) {
-			voice.mv(join(__dirname, `../../public/${username}/${fileName}`));
+		if (existsSync(join(__dirname, `../../public/voices/${username}`))) {
+			voice.mv(join(__dirname, `../../public/voices/${username}/${fileName}`));
 		} else {
-			mkdirSync(join(__dirname, `../../public/${username}`));
-			voice.mv(join(__dirname, `../../public/${username}/${fileName}`));
+			mkdirSync(join(__dirname, `../../public/voices/${username}`));
+			voice.mv(join(__dirname, `../../public/voices/${username}/${fileName}`));
 		}
 
 		return {

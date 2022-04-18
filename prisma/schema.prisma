@@ -29,7 +29,6 @@ model User {
 model Text {
 	id Int @id @default(autoincrement())
 	text String @db.LongText 
-	image String @db.VarChar(255)
 	renderFrom String
 
 	userId Int
@@ -44,7 +43,6 @@ model Text {
 model Voice {
 	id Int @id @default(autoincrement())
 	text String @db.LongText
-	image String @db.VarChar(255)
 	voice String @db.VarChar(255)
 	renderFrom String
 

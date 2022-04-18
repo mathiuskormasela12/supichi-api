@@ -39,3 +39,12 @@ lerna-debug.log*
 
 # Prisma ORM
 prisma/migrations
+
+# Tesseract
+eng.*
+ind.*
+jpn.*
+kor.*
+
+# Voices
+public/voices
