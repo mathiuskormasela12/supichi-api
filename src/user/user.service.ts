@@ -107,7 +107,7 @@ export class UserService {
 		@Body() dto: EditUserProfileDto,
 	) {
 		try {
-			const user = this.prismaService.user.findFirst({ where: { id } });
+			const user = await this.prismaService.user.findFirst({ where: { id } });
 
 			if (!user) {
 				throw this.responseService.responseGenerator(
