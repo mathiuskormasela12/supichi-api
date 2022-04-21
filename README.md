@@ -39,9 +39,9 @@ This is backend service of the Supichi that's written in Nest js.
 
 	```
 	{
-		"full_name": "user fullname",
-		"email": "user email",
-		"password": "user password"
+		"fullName": "your fullname",
+		"username": "your username",
+		"password": "your password"
 	}
 	```
 
@@ -51,77 +51,119 @@ This is backend service of the Supichi that's written in Nest js.
 
 	```
 	{
-		"email": "user email",
-		"password": "user password"
+		"username": "your username",
+		"password": "your password"
 	}
 	```
-
-- GET `/api/v1/user/:id` Route for get user by id
-- PUT `/api/v1/user/:id` Route for edit user by id
-
-	Request Body (Multipart/Form-Data)
-
-	```
-	{
-		"full_name": "user fullname",
-		"email": "user email",
-		"old_password?": "user old password",
-		"new_password?": "user new password",
-		"repeat_password?": "user repeat new password",
-		"photo?": "user blob image"
-	}
-	```
-- DELETE `/api/v1/user/:id` Route for delete user by id
-- GET `/api/v1/student` Route for get all students
-- GET `/api/v1/student/:id` Route for get student by id
-- POST `/api/v1/student` Route for add new student
-
-	Request Body (Multipart/Form-Data)
-
-	```
-	{
-		"student_name": "student fullname",
-		"class": "student class",
-		"major": "student major",
-		"birthday": "student birthday",
-		"birth_place": "student birth place",
-		"nisn": "student nisn",
-		"email": "student email",
-		"photo": "student blob image"
-	}
-	```
-
-- PUT `/api/v1/student/:id` Route for edit student by id
-
-	Request Body (Multipart/Form-Data)
-
-	```
-	{
-		"student_name?": "student fullname",
-		"class?": "student class",
-		"major?": "student major",
-		"birthday?": "student birthday",
-		"birth_place?": "student birth place",
-		"nisn?": "student nisn",
-		"email?": "student email",
-		"photo?": "student blob image"
-	}
-	```
-
-- DELETE `/api/v1/student/:id` Route for delete student by id
-- GET `/api/v1/pdf/student/:id` Route for get student report by id
-- GET `/api/v1/major` Route for get all majors
-
-- POST `/api/v1/major` Route for add new major
+- POST `/api/v1/auth/access-token` Route for generate the access token
 
 	Request Body
 
 	```
 	{
-		"major_name": "major name",
-		"major_description": "major description"
+		"refreshToken": "your refresh token"
 	}
 	```
+- POST `/api/v1/auth/otp` Route for generate the otp code
+
+	Request Body
+
+	```
+	{
+		"username": "your username"
+	}
+	```
+
+- PUT `/api/v1/auth/password` Route for reset the password
+
+	Request Body
+
+	```
+	{
+		"resetCode": "your reset code",
+		"newPassword": "your new password",
+		"confirmPassword": "your confirm password"
+	}
+	```
+
+- PUT `/api/v1/user/photo/:id` Route for upload user photo
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"photo": "blob image",
+	}
+	```
+
+- PUT `/api/v1/user/:id` Route for update user data
+
+	Request Body 
+
+	```
+	{
+		"fullName": "your full name",
+		"username": "your username"
+	}
+	```
+
+- POST `/api/v1/voice` Generate Voice
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"language": "the language of the text",
+		"renderFrom": "the source of text, camera or image gallery",
+		"photo": "blob image"
+	}
+	```
+
+- POST `/api/v1/text` Generate a Text
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"language": "the language of the text",
+		"renderFrom": "the source of text, camera or image gallery",
+		"photo": "blob image"
+	}
+	```
+
+- GET `/api/v1/texts` Get All Texts
+
+	Request Query
+
+	```
+	{
+		"page": "the page in number",
+		"groupByDate": "0 or 1 in number",
+		"orderByd": "asc or desc"
+	}
+	```
+
+- GET `/api/v1/text/:id` Get a text
+
+- DELETE `/api/v1/text/:id` Delete a text
+
+- GET `/api/v1/voices` Get All Voices
+
+	Request Query
+
+	```
+	{
+		"page": "the page in number",
+		"groupByDate": "0 or 1 in number",
+		"orderByd": "asc or desc"
+	}
+	```
+
+- GET `/api/v1/voice/:id` Get a voice
+
+- DELETE `/api/v1/voice/:id` Delete a voice
+
+- GET `/api/v1/voice/download/:id` Download a voice
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
