@@ -1,73 +1,127 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Supichi API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is backend service of the Supichi that's written in Nest js.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Installation 
 
-## Description
+- Make sure you had clone this repo
+- Copy environment from `.env.example` to `.env`
+- Configure your `.env` file according to your MySQL credentials
+- Open your terminal in this project and run 
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+	```bash
+	npm install
+	```
 
-## Installation
+## How To Run This Web Service
 
-```bash
-$ npm install
-```
+- Run On Development
 
-## Running the app
+	```bash
+	npm run start:dev
+	```
 
-```bash
-# development
-$ npm run start
+- Run On Production
 
-# watch mode
-$ npm run start:dev
+	```bash
+	npm run start
+	```
 
-# production mode
-$ npm run start:prod
-```
+## Entity Relationship Diagram (ERD)
 
-## Test
+![alt text](screenshoot/Supichi-ERD.png?raw=true)
 
-```bash
-# unit tests
-$ npm run test
+## API SPECS
 
-# e2e tests
-$ npm run test:e2e
+- POST `/api/v1/auth/register` Route for register new user
 
-# test coverage
-$ npm run test:cov
-```
+	Request Body
 
-## Support
+	```
+	{
+		"full_name": "user fullname",
+		"email": "user email",
+		"password": "user password"
+	}
+	```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- POST `/api/v1/auth/login` Route for login
 
-## Stay in touch
+	Request Body
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+	```
+	{
+		"email": "user email",
+		"password": "user password"
+	}
+	```
+
+- GET `/api/v1/user/:id` Route for get user by id
+- PUT `/api/v1/user/:id` Route for edit user by id
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"full_name": "user fullname",
+		"email": "user email",
+		"old_password?": "user old password",
+		"new_password?": "user new password",
+		"repeat_password?": "user repeat new password",
+		"photo?": "user blob image"
+	}
+	```
+- DELETE `/api/v1/user/:id` Route for delete user by id
+- GET `/api/v1/student` Route for get all students
+- GET `/api/v1/student/:id` Route for get student by id
+- POST `/api/v1/student` Route for add new student
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"student_name": "student fullname",
+		"class": "student class",
+		"major": "student major",
+		"birthday": "student birthday",
+		"birth_place": "student birth place",
+		"nisn": "student nisn",
+		"email": "student email",
+		"photo": "student blob image"
+	}
+	```
+
+- PUT `/api/v1/student/:id` Route for edit student by id
+
+	Request Body (Multipart/Form-Data)
+
+	```
+	{
+		"student_name?": "student fullname",
+		"class?": "student class",
+		"major?": "student major",
+		"birthday?": "student birthday",
+		"birth_place?": "student birth place",
+		"nisn?": "student nisn",
+		"email?": "student email",
+		"photo?": "student blob image"
+	}
+	```
+
+- DELETE `/api/v1/student/:id` Route for delete student by id
+- GET `/api/v1/pdf/student/:id` Route for get student report by id
+- GET `/api/v1/major` Route for get all majors
+
+- POST `/api/v1/major` Route for add new major
+
+	Request Body
+
+	```
+	{
+		"major_name": "major name",
+		"major_description": "major description"
+	}
+	```
 
 ## License
-
-Nest is [MIT licensed](LICENSE).
+[MIT](https://choosealicense.com/licenses/mit/)
