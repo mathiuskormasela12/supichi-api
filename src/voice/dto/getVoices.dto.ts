@@ -1,9 +1,9 @@
-// ========== Get Texts Dto
+// ========== Get Voices Dto
 // import all modules
 import { IsNumber, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class GetTextsDto {
+export class GetVoicesDto {
 	@Type(() => Number)
 	@IsNumber({}, { each: true })
 	page?: number = 1;

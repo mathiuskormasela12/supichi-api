@@ -7,18 +7,25 @@ import {
 	Param,
 	ParseIntPipe,
 	Inject,
+	Query,
+	Response,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as tesseract from 'tesseract.js';
+import * as moment from 'moment';
 import { unlinkSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
-import { IRequestWithUploadAndAppLocals } from '../interfaces';
+import {
+	IRequestWithUploadAndAppLocals,
+	IResponseWithDownload,
+} from '../interfaces';
 import { ResponseService } from '../response/response.service';
 import { UploadService } from '../upload/upload.service';
-import { GenerateVoiceFromImageDto } from './dto';
+import { GenerateVoiceFromImageDto, GetVoicesDto } from './dto';
 import { GttsService } from '../gtts/gtts.service';
 import constants from '../constants';
 import { Voice } from './voice.entity';
+import { TextsVoicesResults } from 'src/types';
 
 @Injectable()
 export class VoiceService {
@@ -228,6 +235,134 @@ export class VoiceService {
 				'Successfully to get detail of voice',
 				{ ...voiceDetail, voiceLink },
 			);
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
+
+	public async getVoices(
+		@Request() req: Request,
+		@Query() queries: GetVoicesDto,
+	) {
+		const { page, limit, groupByDate, orderBy } = queries;
+		const startData = limit * page - limit;
+		try {
+			const { count: totalData, rows } =
+				await this.voicesRepository.findAndCountAll({
+					attributes: ['id', 'text', 'createdAt'],
+					limit,
+					offset: startData,
+					order: [['id', orderBy.toUpperCase()]],
+				});
+			const totalPages = Math.ceil(totalData / limit);
+
+			if (rows.length < 1) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.NOT_FOUND,
+					false,
+					'The voices do not exist',
+					[],
+				);
+			}
+
+			if (groupByDate > 0) {
+				const results: TextsVoicesResults = [
+					{
+						today: {
+							date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
+							data: [],
+						},
+						theDayBeforeToday: {
+							date: 'Yesterday',
+							data: [],
+						},
+					},
+				];
+
+				for (const item of rows) {
+					const createdAt: string = moment(item.createdAt).format(
+						'DD-MMM-YYYY',
+					);
+					const today: string = moment(Date.now()).format('DD-MMM-YYYY');
+					const data = {
+						id: item.id,
+						text: item.text.slice(0, 26).concat('...'),
+						time: moment(item.createdAt).format('hh:mma'),
+					};
+
+					if (createdAt === today) {
+						results[0].today.data.push(data);
+					} else {
+						results[0].theDayBeforeToday.data.push(data);
+					}
+				}
+
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.OK,
+					true,
+					'Successfully to get all voices',
+					results,
+					totalPages,
+					totalData,
+				);
+			} else {
+				const modifiedResults = rows.map((item) => ({
+					id: item.id,
+					text: item.text.slice(0, 26).concat('...'),
+					time: moment(item.createdAt).format('hh:mma'),
+				}));
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.OK,
+					true,
+					'Successfully to get all voices',
+					modifiedResults,
+					totalPages,
+					totalData,
+				);
+			}
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
+
+	public async downloadVoice(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+		@Response() res: IResponseWithDownload,
+	) {
+		try {
+			const voice = await this.voicesRepository.findByPk(id);
+
+			if (!voice) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.NOT_FOUND,
+					false,
+					'The voice does not exist',
+				);
+			}
+			const voiceFileName: string = voice.voice;
+			const voicePath = join(__dirname, `../../public/voices/` + voiceFileName);
+			res.download(voicePath);
 		} catch (err) {
 			if (err instanceof Error) {
 				throw this.responseService.response({

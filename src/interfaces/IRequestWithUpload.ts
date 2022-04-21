@@ -1,6 +1,4 @@
-// ========== IUpload
-// import all modules
-import { Request } from '@nestjs/common';
+// ========== IRequestWithUpload
 
 export interface IRequestWithUpload extends Request {
 	files: {

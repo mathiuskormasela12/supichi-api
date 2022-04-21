@@ -208,7 +208,7 @@ export class TextService {
 		@Request() req: Request,
 		@Query() queries: GetTextsDto,
 	) {
-		const { page, limit } = queries;
+		const { page, limit, groupByDate, orderBy } = queries;
 		const startData = limit * page - limit;
 		try {
 			const { count: totalData, rows } =
@@ -216,6 +216,7 @@ export class TextService {
 					attributes: ['id', 'text', 'createdAt'],
 					limit,
 					offset: startData,
+					order: [['id', orderBy.toUpperCase()]],
 				});
 			const totalPages = Math.ceil(totalData / limit);
 
@@ -229,44 +230,63 @@ export class TextService {
 				);
 			}
 
-			const results: TextsVoicesResults = [
-				{
-					today: {
-						date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
-						data: [],
+			if (groupByDate > 0) {
+				const results: TextsVoicesResults = [
+					{
+						today: {
+							date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
+							data: [],
+						},
+						theDayBeforeToday: {
+							date: 'Yesterday',
+							data: [],
+						},
 					},
-					theDayBeforeToday: {
-						date: 'Yesterday',
-						data: [],
-					},
-				},
-			];
+				];
 
-			for (const item of rows) {
-				const createdAt: string = moment(item.createdAt).format('DD-MMM-YYYY');
-				const today: string = moment(Date.now()).format('DD-MMM-YYYY');
-				const data = {
+				for (const item of rows) {
+					const createdAt: string = moment(item.createdAt).format(
+						'DD-MMM-YYYY',
+					);
+					const today: string = moment(Date.now()).format('DD-MMM-YYYY');
+					const data = {
+						id: item.id,
+						text: item.text.slice(0, 26).concat('...'),
+						time: moment(item.createdAt).format('hh:mma'),
+					};
+
+					if (createdAt === today) {
+						results[0].today.data.push(data);
+					} else {
+						results[0].theDayBeforeToday.data.push(data);
+					}
+				}
+
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.OK,
+					true,
+					'Successfully to get texts',
+					results,
+					totalPages,
+					totalData,
+				);
+			} else {
+				const modifiedResults = rows.map((item) => ({
 					id: item.id,
 					text: item.text.slice(0, 26).concat('...'),
 					time: moment(item.createdAt).format('hh:mma'),
-				};
-
-				if (createdAt === today) {
-					results[0].today.data.push(data);
-				} else {
-					results[0].theDayBeforeToday.data.push(data);
-				}
+				}));
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.OK,
+					true,
+					'Successfully to get texts',
+					modifiedResults,
+					totalPages,
+					totalData,
+				);
 			}
-
-			throw this.responseService.responseGenerator(
-				req,
-				HttpStatus.OK,
-				true,
-				'Successfully to get texts',
-				results,
-				totalPages,
-				totalData,
-			);
 		} catch (err) {
 			if (err instanceof Error) {
 				throw this.responseService.response({

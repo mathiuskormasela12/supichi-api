@@ -1,4 +1,4 @@
-// ========== IUploadPhotoResponse
+// ========== IUploadFileResponse
 
 export interface IUploadFileResponse {
 	status?: number;

@@ -10,10 +10,15 @@ import {
 	Param,
 	ParseIntPipe,
 	Get,
+	Query,
+	Response,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { IRequestWithUploadAndAppLocals } from 'src/interfaces';
-import { GenerateVoiceFromImageDto } from './dto';
+import {
+	IRequestWithUploadAndAppLocals,
+	IResponseWithDownload,
+} from 'src/interfaces';
+import { GenerateVoiceFromImageDto, GetVoicesDto } from './dto';
 import { VoiceService } from './voice.service';
 
 @Controller('api/v1')
@@ -45,5 +50,21 @@ export class VoiceController {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		return this.voiceService.getVoiceDetail(req, id);
+	}
+
+	@Get('voices')
+	@UseGuards(AuthGuard)
+	public getVoices(@Request() req: Request, @Query() queries: GetVoicesDto) {
+		return this.voiceService.getVoices(req, queries);
+	}
+
+	@Get('voice/download/:id')
+	@UseGuards(AuthGuard)
+	public downloadVoice(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+		@Response() res: IResponseWithDownload,
+	) {
+		return this.voiceService.downloadVoice(req, id, res);
 	}
 }

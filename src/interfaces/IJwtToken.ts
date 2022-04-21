@@ -1,4 +1,4 @@
-// ========== IGenerateAccessTokenData
+// ========== IJwtToken
 
 export interface IJwtToken {
 	id: number;

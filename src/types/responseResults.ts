@@ -1,4 +1,4 @@
-// ========== Response Generator Func
+// ========== ResponseResults
 
 export type ResponseResults = {
 	status: number;
