@@ -6,17 +6,20 @@ import {
 	Injectable,
 	Param,
 	ParseIntPipe,
+	Query,
 	Request,
 } from '@nestjs/common';
 import * as tesseract from 'tesseract.js';
+import * as moment from 'moment';
 import { unlinkSync } from 'fs';
 import { join } from 'path';
 import { IRequestWithUploadAndAppLocals } from '../interfaces';
 import { ResponseService } from '../response/response.service';
 import { UploadService } from '../upload/upload.service';
-import { GenerateTextFromImageDto } from './dto';
+import { GenerateTextFromImageDto, GetTextsDto } from './dto';
 import constants from 'src/constants';
 import { Text } from './text.entity';
+import { TextsVoicesResults } from 'src/types';
 
 @Injectable()
 export class TextService {
@@ -187,6 +190,82 @@ export class TextService {
 				true,
 				'Successfully to get detail of text',
 				textDetail,
+			);
+		} catch (err) {
+			if (err instanceof Error) {
+				throw this.responseService.response({
+					status: HttpStatus.BAD_REQUEST,
+					success: false,
+					message: err.message,
+				});
+			} else {
+				throw this.responseService.response(err);
+			}
+		}
+	}
+
+	public async getTexts(
+		@Request() req: Request,
+		@Query() queries: GetTextsDto,
+	) {
+		const { page, limit } = queries;
+		const startData = limit * page - limit;
+		try {
+			const { count: totalData, rows } =
+				await this.textsRepository.findAndCountAll({
+					attributes: ['id', 'text', 'createdAt'],
+					limit,
+					offset: startData,
+				});
+			const totalPages = Math.ceil(totalData / limit);
+
+			if (rows.length < 1) {
+				throw this.responseService.responseGenerator(
+					req,
+					HttpStatus.NOT_FOUND,
+					false,
+					'The texts do not exist',
+					[],
+				);
+			}
+
+			const results: TextsVoicesResults = [
+				{
+					today: {
+						date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
+						data: [],
+					},
+					theDayBeforeToday: {
+						date: 'Yesterday',
+						data: [],
+					},
+				},
+			];
+
+			for (const item of rows) {
+				const createdAt: string = moment(item.createdAt).format('DD-MMM-YYYY');
+				const today: string = moment(Date.now()).format('DD-MMM-YYYY');
+				const data = {
+					id: item.id,
+					text: item.text.slice(0, 26).concat('...'),
+					time: moment(item.createdAt).format('hh:mma'),
+				};
+
+				if (createdAt === today) {
+					results[0].today.data.push(data);
+				} else {
+					results[0].theDayBeforeToday.data.push(data);
+				}
+			}
+
+			throw this.responseService.responseGenerator(
+				req,
+				HttpStatus.OK,
+				true,
+				'Successfully to get texts',
+				results,
+				totalPages,
+				totalData,
 			);
 		} catch (err) {
 			if (err instanceof Error) {

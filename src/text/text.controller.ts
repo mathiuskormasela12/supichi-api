@@ -10,10 +10,11 @@ import {
 	Param,
 	ParseIntPipe,
 	Get,
+	Query,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IRequestWithUploadAndAppLocals } from 'src/interfaces';
-import { GenerateTextFromImageDto } from './dto';
+import { GenerateTextFromImageDto, GetTextsDto } from './dto';
 import { TextService } from './text.service';
 
 @Controller('api/v1')
@@ -45,5 +46,11 @@ export class TextController {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		return this.textService.getTextDetail(req, id);
+	}
+
+	@Get('texts')
+	@UseGuards(AuthGuard)
+	public getTexts(@Request() req: Request, @Query() queries: GetTextsDto) {
+		return this.textService.getTexts(req, queries);
 	}
 }
