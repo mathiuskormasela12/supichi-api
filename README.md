@@ -29,7 +29,7 @@ This is backend service of the Supichi that's written in Nest js.
 
 ## Entity Relationship Diagram (ERD)
 
-![alt text](screenshoot/Supichi-ERD.png?raw=true)
+[<img src="screenshoot/Supichi-ERD.png" width="500" height="500" />](screenshoot/Supichi-ERD.png)
 
 ## API SPECS
 
