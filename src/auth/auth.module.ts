@@ -4,6 +4,7 @@
 import { Module } from '@nestjs/common';
 import { APP_PIPE } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { usersProviders } from 'src/user/users.providers';
 import { ValidationPipe } from '../validation.pipe';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -16,6 +17,7 @@ import { AuthService } from './auth.service';
 			useClass: ValidationPipe,
 		},
 		AuthService,
+		...usersProviders,
 	],
 	controllers: [AuthController],
 })

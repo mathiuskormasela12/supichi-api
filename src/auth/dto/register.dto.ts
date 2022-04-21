@@ -14,7 +14,7 @@ export class RegisterDto {
 	@IsNotEmpty({ message: "The full name field can't be empty" })
 	fullName: string;
 
-	@IsEmail({ message: 'The username must be an email' })
+	@IsEmail()
 	@IsString({ message: 'The username must be a string' })
 	@IsNotEmpty({ message: "The username can't be empty" })
 	username: string;

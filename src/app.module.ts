@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import 'dotenv/config';
-import { PrismaModule } from './prisma/prisma.module';
 import { ResponseModule } from './response/response.module';
 import { NodeMailerModule } from './nodemailer/nodemailer.module';
 import { AuthModule } from './auth/auth.module';
@@ -34,7 +33,6 @@ const { EMAIL, EMAIL_PASSWORD, EMAIL_HOST } = process.env;
 		NodeMailerModule,
 		ResponseModule,
 		GttsModule,
-		PrismaModule,
 	],
 })
 export class AppModule {}

@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 export class ResetPasswordDto {
-	@IsNumberString({ message: 'The rese code is invalid' })
+	@IsNumberString()
 	@IsNotEmpty({ message: "The reset code can't be empty" })
 	resetCode: string;
 

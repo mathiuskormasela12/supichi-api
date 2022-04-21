@@ -3,34 +3,32 @@
 import {
 	Body,
 	HttpStatus,
+	Inject,
 	Injectable,
 	Param,
 	ParseIntPipe,
 	Request,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ResponseService } from 'src/response/response.service';
 import { UploadService } from 'src/upload/upload.service';
 import { IRequestWithUpload } from '../interfaces';
 import { EditUserProfileDto } from './dto';
+import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
 	constructor(
 		private uploadService: UploadService,
-		private prismaService: PrismaService,
+		@Inject('USERS_REPOSITORY')
+		private usersRepository: typeof User,
 		private configService: ConfigService,
 		private responseService: ResponseService,
 	) {}
 
 	public async uploadPhoto(@Request() req: IRequestWithUpload, id: number) {
 		try {
-			const user = await this.prismaService.user.findFirst({
-				where: {
-					id,
-				},
-			});
+			const user = await this.usersRepository.findOne({ where: { id } });
 
 			if (!user) {
 				throw this.responseService.responseGenerator(
@@ -54,15 +52,7 @@ export class UserService {
 			}
 
 			try {
-				const result = await this.prismaService.user.update({
-					data: { photo },
-					where: { id },
-				});
-
-				delete result.password;
-				delete result.fullName;
-				delete result.fullName;
-				delete result.username;
+				await this.usersRepository.update({ photo }, { where: { id } });
 
 				throw this.responseService.responseGenerator(
 					req,
@@ -107,7 +97,7 @@ export class UserService {
 		@Body() dto: EditUserProfileDto,
 	) {
 		try {
-			const user = await this.prismaService.user.findFirst({ where: { id } });
+			const user = await this.usersRepository.findByPk(id);
 
 			if (!user) {
 				throw this.responseService.responseGenerator(
@@ -119,21 +109,18 @@ export class UserService {
 			}
 
 			try {
-				const result = await this.prismaService.user.update({
-					data: { fullName: dto.fullName, username: dto.username },
-					where: { id },
-				});
-
-				delete result.otp;
-				delete result.password;
-				delete result.photo;
+				await this.usersRepository.update(
+					{ fullName: dto.fullName, username: dto.username },
+					{
+						where: { id },
+					},
+				);
 
 				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.OK,
 					true,
 					'The user profile has been updated successfully',
-					result,
 				);
 			} catch (err) {
 				if (err instanceof Error) {

@@ -6,25 +6,27 @@ import {
 	Request,
 	Param,
 	ParseIntPipe,
+	Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as tesseract from 'tesseract.js';
 import { unlinkSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
-import { PrismaService } from '../prisma/prisma.service';
 import { IRequestWithUploadAndAppLocals } from '../interfaces';
 import { ResponseService } from '../response/response.service';
 import { UploadService } from '../upload/upload.service';
 import { GenerateVoiceFromImageDto } from './dto';
 import { GttsService } from '../gtts/gtts.service';
 import constants from '../constants';
+import { Voice } from './voice.entity';
 
 @Injectable()
 export class VoiceService {
 	constructor(
 		private responseService: ResponseService,
 		private uploadService: UploadService,
-		private prismaService: PrismaService,
+		@Inject('VOICES_REPOSITORY')
+		private voicesRepository: typeof Voice,
 		private configService: ConfigService,
 		private gttsService: GttsService,
 	) {}
@@ -94,21 +96,18 @@ export class VoiceService {
 					path: voicePath,
 				});
 				try {
-					const result = await this.prismaService.voice.create({
-						data: {
-							voice: voiceFileName,
-							text: textWithoutLinebreak,
-							userId: req.app.locals.decode.id,
-							renderFrom: dto.renderFrom,
-						},
+					const { dataValues }: any = await this.voicesRepository.create({
+						voice: voiceFileName,
+						text: textWithoutLinebreak,
+						userId: req.app.locals.decode.id,
+						renderFrom: dto.renderFrom,
 					});
-
 					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
 						true,
 						'The image has been converted to text successfully',
-						{ ...result, voiceLink },
+						{ ...dataValues, voiceLink },
 					);
 				} catch (err) {
 					if (err instanceof Error) {
@@ -152,7 +151,7 @@ export class VoiceService {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		try {
-			const voice = await this.prismaService.voice.findFirst({ where: { id } });
+			const voice = await this.voicesRepository.findOne({ where: { id } });
 
 			if (!voice) {
 				throw this.responseService.responseGenerator(
@@ -167,7 +166,7 @@ export class VoiceService {
 			const voicePath = join(__dirname, `../../public/voices/` + voiceFileName);
 
 			try {
-				await this.prismaService.voice.delete({ where: { id } });
+				await this.voicesRepository.destroy({ where: { id } });
 				rmSync(voicePath);
 
 				throw this.responseService.responseGenerator(
@@ -206,9 +205,8 @@ export class VoiceService {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		try {
-			const voiceDetail = await this.prismaService.voice.findUnique({
-				where: { id },
-			});
+			const { dataValues: voiceDetail }: any =
+				await this.voicesRepository.findByPk(id);
 
 			if (!voiceDetail) {
 				throw this.responseService.responseGenerator(

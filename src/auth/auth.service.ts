@@ -1,10 +1,9 @@
 // ========== Auth Service
 // import all modules
-import { Injectable, HttpStatus, Request, Body } from '@nestjs/common';
+import { Injectable, HttpStatus, Request, Body, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
 import {
 	RegisterDto,
 	LoginDto,
@@ -16,11 +15,13 @@ import { IJwtToken } from '../interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResponseService } from 'src/response/response.service';
 import { NodeMailerService } from 'src/nodemailer/nodemailer.service';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
 	constructor(
-		private prismaService: PrismaService,
+		@Inject('USERS_REPOSITORY')
+		private usersRepository: typeof User,
 		private jwtService: JwtService,
 		private configService: ConfigService,
 		private mailerService: MailerService,
@@ -30,7 +31,7 @@ export class AuthService {
 
 	public async register(@Request() req: Request, @Body() dto: RegisterDto) {
 		try {
-			const user = await this.prismaService.user.findFirst({
+			const user = await this.usersRepository.findOne({
 				where: {
 					username: dto.username,
 				},
@@ -47,12 +48,10 @@ export class AuthService {
 			try {
 				const hashed = await argon.hash(dto.password);
 				try {
-					const result = await this.prismaService.user.create({
-						data: {
-							fullName: dto.fullName,
-							username: dto.username,
-							password: hashed,
-						},
+					const result = await this.usersRepository.create({
+						fullName: dto.fullName,
+						username: dto.username,
+						password: hashed,
 					});
 
 					delete result.password;
@@ -105,11 +104,12 @@ export class AuthService {
 
 	public async login(@Request() req: Request, @Body() dto: LoginDto) {
 		try {
-			const user = await this.prismaService.user.findFirst({
+			const user = await this.usersRepository.findOne({
 				where: {
 					username: dto.username,
 				},
 			});
+			console.log(user);
 
 			if (!user || !(await argon.verify(user.password, dto.password))) {
 				throw this.responseService.responseGenerator(
@@ -239,7 +239,7 @@ export class AuthService {
 
 	public async sendOtp(@Request() req: Request, @Body() dto: SendResetCodeDto) {
 		try {
-			const user = await this.prismaService.user.findUnique({
+			const user = await this.usersRepository.findOne({
 				where: {
 					username: dto.username,
 				},
@@ -277,10 +277,10 @@ export class AuthService {
 					otp,
 				);
 				try {
-					await this.prismaService.user.update({
-						data: { otp },
-						where: { id: user.id },
-					});
+					await this.usersRepository.update(
+						{ otp },
+						{ where: { id: user.id } },
+					);
 					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
@@ -337,7 +337,7 @@ export class AuthService {
 		}
 
 		try {
-			const isOtpExists = await this.prismaService.user.findFirst({
+			const isOtpExists = await this.usersRepository.findOne({
 				where: { otp: dto.resetCode },
 			});
 
@@ -353,14 +353,10 @@ export class AuthService {
 			try {
 				const hashed = await argon.hash(dto.newPassword);
 				try {
-					const result = await this.prismaService.user.update({
-						data: { otp: null, password: hashed },
-						where: { id: isOtpExists.id },
-					});
-
-					delete result.password;
-					delete result.otp;
-					delete result.photo;
+					const result = await this.usersRepository.update(
+						{ otp: null, password: hashed },
+						{ where: { id: isOtpExists.id } },
+					);
 
 					throw this.responseService.responseGenerator(
 						req,

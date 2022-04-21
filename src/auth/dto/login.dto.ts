@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 export class LoginDto {
-	@IsEmail({ message: 'The username must be an email' })
+	@IsEmail()
 	@IsString({ message: 'The username must be a string' })
 	@IsNotEmpty({ message: "The username can't be empty" })
 	username: string;

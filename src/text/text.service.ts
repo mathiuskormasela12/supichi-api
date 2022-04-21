@@ -2,6 +2,7 @@
 // import all modules
 import {
 	HttpStatus,
+	Inject,
 	Injectable,
 	Param,
 	ParseIntPipe,
@@ -10,19 +11,20 @@ import {
 import * as tesseract from 'tesseract.js';
 import { unlinkSync } from 'fs';
 import { join } from 'path';
-import { PrismaService } from '../prisma/prisma.service';
 import { IRequestWithUploadAndAppLocals } from '../interfaces';
 import { ResponseService } from '../response/response.service';
 import { UploadService } from '../upload/upload.service';
 import { GenerateTextFromImageDto } from './dto';
 import constants from 'src/constants';
+import { Text } from './text.entity';
 
 @Injectable()
 export class TextService {
 	constructor(
 		private responseService: ResponseService,
 		private uploadService: UploadService,
-		private prismaService: PrismaService,
+		@Inject('TEXTS_REPOSITORY')
+		private textsRepository: typeof Text,
 	) {}
 
 	public async generateTextFromImage(
@@ -75,12 +77,10 @@ export class TextService {
 				.join(' ');
 
 			try {
-				const result = await this.prismaService.text.create({
-					data: {
-						text: textWithoutLinebreak,
-						userId: req.app.locals.decode.id,
-						renderFrom: dto.renderFrom,
-					},
+				const result = await this.textsRepository.create({
+					text: textWithoutLinebreak,
+					userId: req.app.locals.decode.id,
+					renderFrom: dto.renderFrom,
 				});
 
 				throw this.responseService.responseGenerator(
@@ -120,7 +120,7 @@ export class TextService {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		try {
-			const text = await this.prismaService.text.findFirst({ where: { id } });
+			const text = await this.textsRepository.findOne({ where: { id } });
 
 			if (!text) {
 				throw this.responseService.responseGenerator(
@@ -132,7 +132,7 @@ export class TextService {
 			}
 
 			try {
-				await this.prismaService.text.delete({ where: { id } });
+				await this.textsRepository.destroy({ where: { id } });
 
 				throw this.responseService.responseGenerator(
 					req,
@@ -170,9 +170,7 @@ export class TextService {
 		@Param('id', ParseIntPipe) id: number,
 	) {
 		try {
-			const textDetail = await this.prismaService.text.findUnique({
-				where: { id },
-			});
+			const textDetail = await this.textsRepository.findByPk(id);
 
 			if (!textDetail) {
 				throw this.responseService.responseGenerator(
