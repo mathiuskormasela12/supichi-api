@@ -1,6 +1,6 @@
 # Supichi API
 
-This is backend service of the Supichi that's written in Nest js.
+This is the RESTful API of the Supichi that's written in Nest js.
 
 ## Installation 
 
@@ -13,7 +13,13 @@ This is backend service of the Supichi that's written in Nest js.
 	npm install
 	```
 
-## How To Run This Web Service
+## How To Run This RESTful API
+
+- Create The Supichi Database
+
+	```bash
+	CREATE DATABASE supichi CHARACTER SET utf8 COLLATE utf8_general_ci;
+	```
 
 - Run On Development
 
