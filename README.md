@@ -1,6 +1,6 @@
 # Supichi API
 
-This is the RESTful API of the Supichi that's written in Nest js.
+This is the RESTful API of the Supichi that's written in the Nest js.
 
 ## Installation 
 
