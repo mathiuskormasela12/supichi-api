@@ -54,16 +54,16 @@ export class AuthService {
 						password: hashed,
 					});
 
-					delete result.password;
-					delete result.otp;
-					delete result.photo;
-
 					throw this.responseService.responseGenerator(
 						req,
 						HttpStatus.CREATED,
 						true,
 						'Register Successfully',
-						result,
+						{
+							id: result.id,
+							fullName: result.fullName,
+							username: result.username,
+						},
 					);
 				} catch (err) {
 					if (err instanceof Error) {
