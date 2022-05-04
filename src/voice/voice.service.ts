@@ -277,14 +277,12 @@ export class VoiceService {
 			if (groupByDate > 0) {
 				const results: TextsVoicesResults = [
 					{
-						today: {
-							date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
-							data: [],
-						},
-						theDayBeforeToday: {
-							date: 'Yesterday',
-							data: [],
-						},
+						date: `Today, ${moment(Date.now()).format('MMM/DD/YYYY')}`,
+						data: [],
+					},
+					{
+						date: 'Yesterday',
+						data: [],
 					},
 				];
 
@@ -300,9 +298,9 @@ export class VoiceService {
 					};
 
 					if (createdAt === today) {
-						results[0].today.data.push(data);
+						results[0].data.push(data);
 					} else {
-						results[0].theDayBeforeToday.data.push(data);
+						results[1].data.push(data);
 					}
 				}
 

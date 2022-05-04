@@ -2,13 +2,11 @@
 
 export type TextsVoicesResults = [
 	{
-		today: {
-			date: string;
-			data: unknown[];
-		};
-		theDayBeforeToday: {
-			date: string;
-			data: unknown[];
-		};
+		date: string;
+		data: unknown[];
+	},
+	{
+		date: string;
+		data: unknown[];
 	},
 ];
