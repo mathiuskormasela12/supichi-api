@@ -112,6 +112,7 @@ This is the RESTful API of the Supichi that's written in the Nest js.
 		"username": "your username"
 	}
 	```
+- GET `/api/v1/user/:id` Route to get user profile
 
 - POST `/api/v1/voice` Generate Voice
 
