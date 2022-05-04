@@ -267,6 +267,8 @@ export class AuthService {
 				Math.floor(Math.random() * 9) + 1
 			}${Math.floor(Math.random() * 9) + 1}${
 				Math.floor(Math.random() * 9) + 1
+			}${Math.floor(Math.random() * 9) + 1}${
+				Math.floor(Math.random() * 9) + 1
 			}`;
 
 			try {
