@@ -8,6 +8,8 @@ import { ValidationPipe } from '../validation.pipe';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { usersProviders } from './users.providers';
+import { textsProviders } from '../text/text.providers';
+import { voicesProviders } from 'src/voice/voices.providers';
 
 @Module({
 	imports: [JwtModule.register({}), DatabaseModule],
@@ -18,6 +20,8 @@ import { usersProviders } from './users.providers';
 		},
 		UserService,
 		...usersProviders,
+		...textsProviders,
+		...voicesProviders,
 	],
 	controllers: [UserController],
 })

@@ -6,6 +6,7 @@ import {
 	Param,
 	ParseIntPipe,
 	Put,
+	Get,
 	Request,
 	UseGuards,
 } from '@nestjs/common';
@@ -35,5 +36,14 @@ export class UserController {
 		@Body() dto: EditUserProfileDto,
 	) {
 		return this.userService.editUserProfile(req, id, dto);
+	}
+
+	@Get('user/:id')
+	@UseGuards(AuthGuard)
+	public getUserProfile(
+		@Request() req: Request,
+		@Param('id', ParseIntPipe) id: number,
+	) {
+		return this.userService.getUserProfile(req, id);
 	}
 }
