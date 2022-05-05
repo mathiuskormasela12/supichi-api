@@ -261,6 +261,7 @@ export class VoiceService {
 					limit,
 					offset: startData,
 					order: [['id', orderBy.toUpperCase()]],
+					where: { userId: queries.id },
 				});
 			const totalPages = Math.ceil(totalData / limit);
 
