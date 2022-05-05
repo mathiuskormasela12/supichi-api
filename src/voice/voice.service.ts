@@ -228,12 +228,20 @@ export class VoiceService {
 				.get('APP_URL')
 				.concat('/voices/', voiceDetail.voice);
 
+			const result = {
+				id: voiceDetail.id,
+				renderFrom: voiceDetail.renderFrom,
+				text: voiceDetail.text,
+				date: moment(voiceDetail.createdAt).format('hh:mma'),
+				voiceLink,
+			};
+
 			throw this.responseService.responseGenerator(
 				req,
 				HttpStatus.OK,
 				true,
 				'Successfully to get detail of voice',
-				{ ...voiceDetail, voiceLink },
+				result,
 			);
 		} catch (err) {
 			if (err instanceof Error) {

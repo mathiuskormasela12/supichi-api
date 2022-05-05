@@ -184,12 +184,19 @@ export class TextService {
 				);
 			}
 
+			const result = {
+				id: textDetail.id,
+				renderFrom: textDetail.renderFrom,
+				text: textDetail.text,
+				date: moment(textDetail.createdAt).format('hh:mma'),
+			};
+
 			throw this.responseService.responseGenerator(
 				req,
 				HttpStatus.OK,
 				true,
 				'Successfully to get detail of text',
-				textDetail,
+				result,
 			);
 		} catch (err) {
 			if (err instanceof Error) {
