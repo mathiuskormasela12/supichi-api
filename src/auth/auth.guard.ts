@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
 				return true;
 			} catch (err) {
 				throw this.responseService.response({
-					status: HttpStatus.BAD_REQUEST,
+					status: HttpStatus.FORBIDDEN,
 					success: false,
 					message: err.message,
 				});
