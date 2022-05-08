@@ -26,7 +26,7 @@ export class UserService {
 		private usersRepository: typeof User,
 		@Inject('TEXTS_REPOSITORY')
 		private textsRepository: typeof Text,
-		@Inject('TEXTS_REPOSITORY')
+		@Inject('VOICES_REPOSITORY')
 		private voicesRepository: typeof Voice,
 		private configService: ConfigService,
 		private responseService: ResponseService,
@@ -170,10 +170,14 @@ export class UserService {
 			}
 
 			try {
-				const textsCount = await this.textsRepository.count();
+				const textsCount = await this.textsRepository.count({
+					where: { userId: user.id },
+				});
 
 				try {
-					const voicesCount = await this.voicesRepository.count();
+					const voicesCount = await this.voicesRepository.count({
+						where: { userId: user.id },
+					});
 					const results = {
 						id: user.id,
 						fullName: user.fullName,
