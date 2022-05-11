@@ -2,7 +2,7 @@
 // import all modules
 import { Injectable, HttpStatus, Request, Body, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import {
 	RegisterDto,
@@ -46,7 +46,7 @@ export class AuthService {
 				);
 			}
 			try {
-				const hashed = await argon.hash(dto.password);
+				const hashed = await bcrypt.hash(dto.password, 8);
 				try {
 					const result = await this.usersRepository.create({
 						fullName: dto.fullName,
@@ -111,7 +111,7 @@ export class AuthService {
 			});
 			console.log(user);
 
-			if (!user || !(await argon.verify(user.password, dto.password))) {
+			if (!user || !(await bcrypt.compare(dto.password, user.password))) {
 				throw this.responseService.responseGenerator(
 					req,
 					HttpStatus.BAD_REQUEST,
@@ -353,7 +353,7 @@ export class AuthService {
 			}
 
 			try {
-				const hashed = await argon.hash(dto.newPassword);
+				const hashed = await bcrypt.hash(dto.newPassword, 8);
 				try {
 					const result = await this.usersRepository.update(
 						{ otp: null, password: hashed },
