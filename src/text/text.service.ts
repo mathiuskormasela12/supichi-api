@@ -257,7 +257,7 @@ export class TextService {
 					const today: string = moment(Date.now()).format('DD-MMM-YYYY');
 					const data = {
 						id: item.id,
-						text: item.text.slice(0, 26).concat('...'),
+						text: item.text,
 						time: moment(item.createdAt).format('hh:mma'),
 					};
 
